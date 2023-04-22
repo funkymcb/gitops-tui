@@ -1,4 +1,12 @@
-use git2::{Commit, Error, Repository, Sort};
+use git2::{Error, Repository, Sort, Time};
+
+#[derive(Debug)]
+pub struct ExtendedCommit {
+    pub id: String,
+    pub summary: String,
+    pub author: String,
+    pub date: Time,
+}
 
 pub fn init(path: &String) {
     let repo = match Repository::open(path) {
@@ -10,7 +18,7 @@ pub fn init(path: &String) {
     println!("{:#?}", commits);
 }
 
-pub fn get_commits<'a>(repo: &'a Repository) -> Result<Vec<Commit<'a>>, Error> {
+pub fn get_commits<'a>(repo: &'a Repository) -> Result<Vec<ExtendedCommit>, Error> {
     let mut revwalk = repo.revwalk()?;
 
     revwalk.push_head()?;
@@ -19,7 +27,15 @@ pub fn get_commits<'a>(repo: &'a Repository) -> Result<Vec<Commit<'a>>, Error> {
     let mut commits = Vec::new();
     for rev in revwalk {
         let commit = repo.find_commit(rev?)?;
-        commits.push(commit);
+
+        let extd_commit = ExtendedCommit {
+            id: commit.id().to_string(),
+            summary: commit.summary().unwrap_or("").to_string(),
+            author: commit.author().to_string(),
+            date: commit.author().when(),
+        };
+
+        commits.push(extd_commit);
     }
 
     Ok(commits)
