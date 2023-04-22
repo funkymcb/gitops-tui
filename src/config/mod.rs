@@ -1,4 +1,4 @@
-mod cfg_models;
+pub mod cfg_models;
 use cfg_models::Config;
 
 pub fn read() -> Config {

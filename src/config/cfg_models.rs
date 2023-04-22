@@ -1,19 +1,19 @@
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Stage {
-    name: String,
-    weight: i8,
+pub struct Stage {
+    pub name: String,
+    pub weight: i8,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Cluster {
-    stage: Stage,
-    path: String,
-    repo: String,
+pub struct Cluster {
+    pub stage: Stage,
+    pub path: String,
+    pub repo: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
-    clusters: Vec<Cluster>,
+    pub clusters: Vec<Cluster>,
 }

@@ -2,10 +2,10 @@ clusters:
   - stage:
       name: "staging"
       weight: 2
-    path: "$HOME/clusters/staging"
-    repo: "https://github.com/funkymcb/clusters/staging"
+    path: "path/to/cluster/staging"
+    repo: "git@github.com/funkymcb/clusters/staging.git"
   - stage:
       name: "production"
       weight: 1
-    path: "$HOME/clusters/prod"
-    repo: "https://github.com/funkymcb/clusters/prod"
+    path: "path/to/cluster/prod"
+    repo: "git@github.com/funkymcb/clusters/prod.git"
