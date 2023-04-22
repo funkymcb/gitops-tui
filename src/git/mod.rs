@@ -1,17 +1,16 @@
-use git2::{Error, Repository, Sort};
+use git2::{Commit, Error, Repository, Sort};
 
-pub fn log(path: String) -> Result<(), Error> {
-    let repo = Repository::open(path)?;
+pub fn get_commits<'a>(repo: &'a Repository) -> Result<Vec<Commit<'a>>, Error> {
     let mut revwalk = repo.revwalk()?;
 
     revwalk.push_head()?;
     revwalk.set_sorting(Sort::TIME)?;
 
+    let mut commits = Vec::new();
     for rev in revwalk {
         let commit = repo.find_commit(rev?)?;
-        let message = commit.summary_bytes().unwrap_or_else(|| commit.message_bytes());
-        println!("{}\t{}", commit.id(), String::from_utf8_lossy(message));
+        commits.push(commit);
     }
 
-    Ok(())
+    Ok(commits)
 }
