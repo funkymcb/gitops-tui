@@ -3,9 +3,7 @@ clusters:
       name: "staging"
       weight: 2
     path: "path/to/cluster/staging"
-    repo: "git@github.com/funkymcb/clusters/staging.git"
   - stage:
       name: "production"
       weight: 1
     path: "path/to/cluster/prod"
-    repo: "git@github.com/funkymcb/clusters/prod.git"

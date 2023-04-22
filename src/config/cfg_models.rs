@@ -10,7 +10,6 @@ pub struct Stage {
 pub struct Cluster {
     pub stage: Stage,
     pub path: String,
-    pub repo: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
