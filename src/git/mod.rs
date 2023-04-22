@@ -1,12 +1,13 @@
 use git2::{Commit, Error, Repository, Sort};
 
-pub fn init(path: &String) -> Result<(), Error> {
-    let repo = Repository::open(path)?;
+pub fn init(path: &String) {
+    let repo = match Repository::open(path) {
+        Ok(repo) => repo,
+        Err(e) => panic!("Could not open repository {}", e),
+    };
     let commits = get_commits(&repo);
 
     println!("{:#?}", commits);
-
-    Ok(())
 }
 
 pub fn get_commits<'a>(repo: &'a Repository) -> Result<Vec<Commit<'a>>, Error> {
