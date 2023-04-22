@@ -1,0 +1,11 @@
+clusters:
+  - stage:
+      name: "staging"
+      weight: 2
+    path: "$HOME/clusters/staging"
+    repo: "https://github.com/funkymcb/clusters/staging"
+  - stage:
+      name: "prod"
+      weight: 1
+    path: "$HOME/clusters/prod"
+    repo: "https://github.com/funkymcb/clusters/prod"
