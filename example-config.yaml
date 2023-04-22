@@ -5,7 +5,7 @@ clusters:
     path: "$HOME/clusters/staging"
     repo: "https://github.com/funkymcb/clusters/staging"
   - stage:
-      name: "prod"
+      name: "production"
       weight: 1
     path: "$HOME/clusters/prod"
     repo: "https://github.com/funkymcb/clusters/prod"
