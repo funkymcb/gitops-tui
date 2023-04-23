@@ -34,7 +34,7 @@ pub fn get_commits<'a>(repo: &'a Repository) -> Result<Vec<ExtendedCommit>, Erro
         let extd_commit = ExtendedCommit {
             id: commit.id().to_string(),
             summary: commit.summary().unwrap_or("").to_string(),
-            author: commit.author().to_string(),
+            author: commit.author().name().unwrap().to_string(),
             date,
         };
 
