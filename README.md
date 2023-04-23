@@ -9,7 +9,7 @@ Tui to help synchronise different gitops cluster repos
 - [ ] list pretty printed commits (like: `git log --pretty=format:"%<(16)%ah: %Cgreen%h%Creset %an: %B"`)
     - [x] extend revwalk (commits) with author and date
     - [ ] pretty print author
-    - [ ] pretty print date
+    - [x] pretty print date
 - [ ] build tui layout:
     - [ ] picker for commits
     - [ ] file picker based on stages and picked commits
