@@ -1,8 +1,26 @@
-pub mod cfg_models;
-use cfg_models::Config;
+use serde::{Serialize, Deserialize};
 
-pub fn read() -> Config {
-    let f = std::fs::File::open("config.yaml").expect("Could not open config file");
-    let cfg: Config = serde_yaml::from_reader(f).expect("Could not read config values");
-    return cfg
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(tag = "general")]
+pub struct GeneralCfg {
+    #[serde(rename = "time-format")]
+    pub time_format: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Stage {
+    pub name: String,
+    pub weight: i8,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Cluster {
+    pub stage: Stage,
+    pub path: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Config {
+    pub general: GeneralCfg,
+    pub clusters: Vec<Cluster>,
 }

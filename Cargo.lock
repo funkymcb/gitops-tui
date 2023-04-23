@@ -181,6 +181,7 @@ dependencies = [
  "chrono",
  "crossterm",
  "git2",
+ "once_cell",
  "serde",
  "serde_yaml",
  "tui",
