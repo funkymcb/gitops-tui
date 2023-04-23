@@ -9,6 +9,7 @@ use config::Config;
 
 mod config;
 mod git;
+mod tui;
 
 static CONFIG: Lazy<Config> = Lazy::new(|| {
     let file = File::open("config.yaml").expect("Failed to open config file");
@@ -22,6 +23,8 @@ fn main() -> Result<(), io::Error> {
     for repo in &CONFIG.clusters {
         git::init(&repo.path);
     }
+
+    tui::init();
 
     Ok(())
 }
