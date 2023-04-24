@@ -6,63 +6,20 @@ use tui::style::{Style, Modifier, Color};
 use tui::text::Spans;
 use tui::{Terminal, Frame};
 use tui::backend::{CrosstermBackend, Backend};
-use tui::widgets::{ListState, ListItem, List, Block, Borders};
+use tui::widgets::{ListItem, List, Block, Borders};
 use std::{io, vec};
 
-struct StatefulList {
-    state: ListState,
-    items: Vec<String>,
-}
-
-impl StatefulList {
-    fn with_items(items: Vec<String>) -> StatefulList {
-        StatefulList {
-            state: ListState::default(), 
-            items,
-        }
-    }
-
-    fn next(&mut self) {
-        let i = match self.state.selected() {
-            Some(i) => {
-                if i >= self.items.len() - 1 {
-                    0
-                } else {
-                    i + 1
-                }
-            }
-            None => 0,
-        };
-        self.state.select(Some(i));
-    }
-
-    fn previous(&mut self) {
-        let i = match self.state.selected() {
-            Some(i) => {
-                if i == 0 {
-                    self.items.len() - 1
-                } else {
-                    i - 1
-                }
-            }
-            None => 0,
-        };
-        self.state.select(Some(i));
-    }
-
-    fn unselect(&mut self) {
-        self.state.select(None);
-    }
-}
+mod commits;
+use commits::CommitList;
 
 struct App {
-    items: StatefulList,
+    items: CommitList,
 }
 
 impl App {
     fn new(commits: Vec<String>) -> App {
         App {
-           items: StatefulList::with_items(commits), //TODO get commit here
+           items: CommitList::with_items(commits),
         }
     }
 }
@@ -92,10 +49,7 @@ pub fn init(commits: Vec<String>) {
     }
 }
 
-fn run_app<B: Backend>(
-    terminal: &mut Terminal<B>,
-    mut app: App,
-) -> io::Result<()> {
+fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App,) -> io::Result<()> {
     loop {
         terminal.draw(|f| ui(f, &mut app))?;
 
