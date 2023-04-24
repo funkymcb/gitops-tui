@@ -26,23 +26,33 @@ impl App {
 
 pub fn init(commits: Vec<String>) {
     // setup terminal
-    enable_raw_mode().expect("unable to initialize raw mode terminal");
+    enable_raw_mode()
+        .expect("unable to initialize raw mode terminal");
+
     let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen, EnableMouseCapture).expect("unable to execute terminal");
+    execute!(stdout, EnterAlternateScreen, EnableMouseCapture)
+        .expect("unable to execute terminal");
+
     let backend = CrosstermBackend::new(stdout);
-    let mut terminal = Terminal::new(backend).expect("unable to initialize tui");
+    let mut terminal = Terminal::new(backend)
+        .expect("unable to initialize tui");
 
     // create app and run it
     let app = App::new(commits);
     let res = run_app(&mut terminal, app);
 
-    disable_raw_mode().expect("could not disable raw mode");
+    disable_raw_mode()
+        .expect("could not disable raw mode");
+
     execute!(
         terminal.backend_mut(),
         LeaveAlternateScreen,
         DisableMouseCapture
-    ).expect("unable to quit tui");
-    terminal.show_cursor().expect("could not show cursor");
+    )
+        .expect("unable to quit tui");
+
+    terminal.show_cursor()
+        .expect("could not show cursor");
 
     if let Err(err) = res {
         print!("{:?}", err)
