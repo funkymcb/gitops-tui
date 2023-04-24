@@ -13,6 +13,12 @@ impl CommitList {
         }
     }
 
+    pub fn select(&mut self) {
+        print!("selected!")
+        // TODO: Idea... add boolean value to CommitList... on selection: true
+        // with [ ], [x] checkbox before
+    }
+
     pub fn next(&mut self) {
         let i = match self.state.selected() {
             Some(i) => {
