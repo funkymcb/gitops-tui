@@ -1,2 +1,136 @@
-pub fn init() {
+use crossterm::terminal::{enable_raw_mode, EnterAlternateScreen, disable_raw_mode, LeaveAlternateScreen};
+use crossterm::{execute, event};
+use crossterm::event::{EnableMouseCapture, Event, KeyCode, DisableMouseCapture};
+use tui::layout::{Layout, Direction, Constraint};
+use tui::style::{Style, Modifier, Color};
+use tui::text::Spans;
+use tui::{Terminal, Frame};
+use tui::backend::{CrosstermBackend, Backend};
+use tui::widgets::{ListState, ListItem, List, Block, Borders};
+use std::{io, vec};
+
+struct StatefulList {
+    state: ListState,
+    items: Vec<String>,
+}
+
+impl StatefulList {
+    fn with_items(items: Vec<String>) -> StatefulList {
+        StatefulList {
+            state: ListState::default(), 
+            items,
+        }
+    }
+
+    fn next(&mut self) {
+        let i = match self.state.selected() {
+            Some(i) => {
+                if i >= self.items.len() - 1 {
+                    0
+                } else {
+                    i + 1
+                }
+            }
+            None => 0,
+        };
+        self.state.select(Some(i));
+    }
+
+    fn previous(&mut self) {
+        let i = match self.state.selected() {
+            Some(i) => {
+                if i == 0 {
+                    self.items.len() - 1
+                } else {
+                    i - 1
+                }
+            }
+            None => 0,
+        };
+        self.state.select(Some(i));
+    }
+
+    fn unselect(&mut self) {
+        self.state.select(None);
+    }
+}
+
+struct App {
+    items: StatefulList,
+}
+
+impl App {
+    fn new(commits: Vec<String>) -> App {
+        App {
+           items: StatefulList::with_items(commits), //TODO get commit here
+        }
+    }
+}
+
+pub fn init(commits: Vec<String>) {
+    // setup terminal
+    enable_raw_mode().expect("unable to initialize raw mode terminal");
+    let mut stdout = io::stdout();
+    execute!(stdout, EnterAlternateScreen, EnableMouseCapture).expect("unable to execute terminal");
+    let backend = CrosstermBackend::new(stdout);
+    let mut terminal = Terminal::new(backend).expect("unable to initialize tui");
+
+    // create app and run it
+    let app = App::new(commits);
+    let res = run_app(&mut terminal, app);
+
+    disable_raw_mode().expect("could not disable raw mode");
+    execute!(
+        terminal.backend_mut(),
+        LeaveAlternateScreen,
+        DisableMouseCapture
+    ).expect("unable to quit tui");
+    terminal.show_cursor().expect("could not show cursor");
+
+    if let Err(err) = res {
+        print!("{:?}", err)
+    }
+}
+
+fn run_app<B: Backend>(
+    terminal: &mut Terminal<B>,
+    mut app: App,
+) -> io::Result<()> {
+    loop {
+        terminal.draw(|f| ui(f, &mut app))?;
+
+        if let Event::Key(key) = event::read()? {
+            match key.code {
+                KeyCode::Char('q') => return Ok(()),
+                KeyCode::Left => app.items.unselect(),
+                KeyCode::Down => app.items.next(),
+                KeyCode::Up => app.items.previous(),
+                _ => {}
+            }
+        }
+    }
+}
+
+fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
+    let commit_list = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([Constraint::Percentage(100)].as_ref())
+        .split(f.size());
+
+    let items: Vec<ListItem> = app.items.items.iter().map(|i| {
+        let lines = vec![Spans::from(i.as_str())];
+        ListItem::new(lines).style(Style::default().fg(Color::White).bg(Color::Black))
+    })
+    .collect();
+
+    let items = List::new(items)
+        .block(Block::default().borders(Borders::ALL).title("Commits"))
+        .highlight_style(
+            Style::default()
+                .bg(Color::LightGreen)
+                .add_modifier(Modifier::BOLD),
+            )
+        .highlight_symbol(">> ");
+
+    f.render_stateful_widget(items, commit_list[0], &mut app.items.state);
 }

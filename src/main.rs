@@ -20,11 +20,13 @@ static CONFIG: Lazy<Config> = Lazy::new(|| {
 });
 
 fn main() -> Result<(), io::Error> {
+    let mut stages = Vec::<Vec<String>>::new();
+
     for repo in &CONFIG.clusters {
-        git::init(&repo.path);
+        stages.push(git::init(&repo.path));
     }
 
-    tui::init();
+    tui::init(stages.remove(0)); // TODO implement logic which stage should be listed
 
     Ok(())
 }

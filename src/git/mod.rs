@@ -10,18 +10,30 @@ pub struct ExtendedCommit {
     pub date: String,
 }
 
-pub fn init(path: &String) {
+impl<'a> ExtendedCommit {
+    fn to_string(self) -> String {
+        let str = format!(
+            "{}: {}: {}: {}",
+            self.date,
+            self.id,
+            self.author,
+            self.summary,
+        );
+        str
+    }
+}
+
+pub fn init(path: &String) -> Vec<String> {
     let repo = match Repository::open(path) {
         Ok(repo) => repo,
         Err(e) => panic!("Could not open repository {}", e),
     };
 
-    let commits = get_commits(&repo);
-
-    println!("{:#?}", commits);
+    let commit_str = get_commits(&repo).unwrap();
+    commit_str
 }
 
-pub fn get_commits<'a>(repo: &'a Repository) -> Result<Vec<ExtendedCommit>, Error> {
+pub fn get_commits<'a>(repo: &'a Repository) -> Result<Vec<String>, Error> {
     let mut revwalk = repo.revwalk()?;
 
     revwalk.push_head()?;
@@ -30,17 +42,17 @@ pub fn get_commits<'a>(repo: &'a Repository) -> Result<Vec<ExtendedCommit>, Erro
     let mut commits = Vec::new();
     for rev in revwalk {
         let commit = repo.find_commit(rev?)?;
-
+        let id = commit.id().to_string()[0..8].to_string();
         let date = convert_timestamp(commit.author().when().seconds());
 
         let extd_commit = ExtendedCommit {
-            id: commit.id().to_string(),
+            id,
             summary: commit.summary().unwrap_or("").to_string(),
             author: commit.author().name().unwrap_or("unknown").to_string(),
             date,
         };
 
-        commits.push(extd_commit);
+        commits.push(extd_commit.to_string());
     }
 
     Ok(commits)

@@ -10,8 +10,7 @@ Tui to help synchronise different gitops cluster repos
     - [x] extend revwalk (commits) with author and date
     - [x] pretty print author
     - [x] pretty print date
-    - [ ] implement Display for ExtendedConfig struct
 - [ ] build tui layout:
-    - [ ] picker for commits
+    - [x] picker for commits
     - [ ] file picker based on stages and picked commits
     - [ ] diff based on picked files
