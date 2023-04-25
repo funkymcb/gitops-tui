@@ -2,21 +2,26 @@ use tui::widgets::ListState;
 
 pub struct CommitList {
     pub state: ListState,
-    pub items: Vec<String>,
+    pub items: Vec<(String, bool)>,
 }
 
 impl CommitList {
-    pub fn with_items(items: Vec<String>) -> CommitList {
+    pub fn with_items(items: Vec<(String, bool)>) -> CommitList {
         CommitList {
             state: ListState::default(), 
             items,
         }
     }
 
-    pub fn select(&mut self) {
-        print!("selected!")
-        // TODO: Idea... add boolean value to CommitList... on selection: true
-        // with [ ], [x] checkbox before
+    pub fn toggle(&mut self) {
+        let i = self.state.selected().unwrap();
+
+        self.items[i].1 = !self.items[i].1;
+        if self.items[i].1 {
+            self.items[i].0.replace_range(0..4, "[x] ");
+        } else {
+            self.items[i].0.replace_range(0..4, "[ ] ");
+        }
     }
 
     pub fn next(&mut self) {

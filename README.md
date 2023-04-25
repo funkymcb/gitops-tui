@@ -13,7 +13,8 @@ Tui to help synchronise different gitops cluster repos
 - [ ] build tui layout:
     - [x] picker for commits
         - [x] list commits
-        - [ ] make commits selectable
+        - [x] make commits selectable
+        - [x] add checkbox before string
     - [ ] refactor and seperate into modules
     - [ ] file picker based on stages and picked commits
     - [ ] diff based on picked files

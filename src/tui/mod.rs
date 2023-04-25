@@ -17,7 +17,7 @@ struct App {
 }
 
 impl App {
-    fn new(commits: Vec<String>) -> App {
+    fn new(commits: Vec<(String, bool)>) -> App {
         App {
            items: CommitList::with_items(commits),
         }
@@ -37,8 +37,13 @@ pub fn init(commits: Vec<String>) {
     let mut terminal = Terminal::new(backend)
         .expect("unable to initialize tui");
 
+    let mut stateful_commits = Vec::new();
+    for commit in commits {
+        stateful_commits.push((commit, false))
+    }
+
     // create app and run it
-    let app = App::new(commits);
+    let app = App::new(stateful_commits);
     let res = run_app(&mut terminal, app);
 
     disable_raw_mode()
@@ -66,7 +71,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App,) -> io::Result<
         if let Event::Key(key) = event::read()? {
             match key.code {
                 KeyCode::Char('q') => return Ok(()),
-                KeyCode::Enter => app.items.select(),
+                KeyCode::Enter => app.items.toggle(),
                 KeyCode::Left => app.items.unselect(),
                 KeyCode::Down => app.items.next(),
                 KeyCode::Up => app.items.previous(),
@@ -83,8 +88,12 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .split(f.size());
 
     let items: Vec<ListItem> = app.items.items.iter().map(|i| {
-        let lines = vec![Spans::from(i.as_str())];
-        ListItem::new(lines).style(Style::default().fg(Color::White).bg(Color::Black))
+        let lines = vec![Spans::from(i.0.as_str())];
+        if i.1 {
+            ListItem::new(lines).style(Style::default().fg(Color::Black).bg(Color::LightGreen))
+        } else {
+            ListItem::new(lines).style(Style::default().fg(Color::White).bg(Color::Black))
+        }
     })
     .collect();
 
@@ -92,7 +101,8 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .block(Block::default().borders(Borders::ALL).title("Commits"))
         .highlight_style(
             Style::default()
-                .bg(Color::LightGreen)
+                .fg(Color::Black)
+                .bg(Color::White)
                 .add_modifier(Modifier::BOLD),
             )
         .highlight_symbol(">> ");

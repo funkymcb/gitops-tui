@@ -13,7 +13,7 @@ pub struct ExtendedCommit {
 impl<'a> ExtendedCommit {
     fn to_string(self) -> String {
         let str = format!(
-            "{}: {}: {}: {}",
+            "[ ] {}: {}: {}: {}",
             self.date,
             self.id,
             self.author,
