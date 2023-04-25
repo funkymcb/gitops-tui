@@ -1,4 +1,4 @@
-# gitops-tui
+# WIP: gitops-tui
 Tui to help synchronise different gitops cluster repos
 
 # TODOs
@@ -15,7 +15,7 @@ Tui to help synchronise different gitops cluster repos
         - [x] list commits
         - [x] make commits selectable
         - [x] add checkbox before string
-    - [ ] refactor and seperate into modules
+    - [x] refactor and seperate into modules
     - [ ] file picker based on stages and picked commits
     - [ ] diff based on picked files
 - [ ] quality of life:
