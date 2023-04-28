@@ -83,12 +83,12 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App,) -> io::Result<
 }
 
 fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
-    let commit_list = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([Constraint::Percentage(100)].as_ref())
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Percentage(25), Constraint::Percentage(75)].as_ref())
         .split(f.size());
 
-    let items: Vec<ListItem> = app.commits.items.iter().map(|i| {
+    let commits: Vec<ListItem> = app.commits.items.iter().map(|i| {
         let lines = vec![Spans::from(i.0.as_str())];
         if i.1 {
             ListItem::new(lines).style(Style::default().fg(Color::Black).bg(Color::LightGreen))
@@ -98,7 +98,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     })
     .collect();
 
-    let items = List::new(items)
+    let commit_list = List::new(commits)
         .block(Block::default().borders(Borders::ALL).title("Commits"))
         .highlight_style(
             Style::default()
@@ -108,5 +108,18 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
             )
         .highlight_symbol(">> ");
 
-    f.render_stateful_widget(items, commit_list[0], &mut app.commits.state);
+    // TODO think about how to get diffs of selected commits herer
+    let diffs: Vec<ListItem> = Vec::new();
+    let diff_list = List::new(diffs)
+        .block(Block::default().borders(Borders::ALL).title("diff tree"))
+        .highlight_style(
+            Style::default()
+                .fg(Color::Black)
+                .bg(Color::White)
+                .add_modifier(Modifier::BOLD),
+            )
+        .highlight_symbol(">> ");
+
+    f.render_stateful_widget(commit_list, chunks[0], &mut app.commits.state);
+    f.render_stateful_widget(diff_list, chunks[1], &mut app.commits.state);
 }

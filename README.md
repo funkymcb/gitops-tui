@@ -19,4 +19,7 @@ Tui to help synchronise different gitops cluster repos
     - [ ] file picker based on stages and picked commits
     - [ ] diff based on picked files
 - [ ] quality of life:
-    - [ ] filter commits by branch/author/date
+    - [ ] only show commits of master branch
+
+# raw ideas
+only if commit selected we show diffs
