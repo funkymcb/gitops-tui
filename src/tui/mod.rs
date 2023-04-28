@@ -1,6 +1,7 @@
 use crossterm::terminal::{enable_raw_mode, EnterAlternateScreen, disable_raw_mode, LeaveAlternateScreen};
 use crossterm::{execute, event};
 use crossterm::event::{EnableMouseCapture, Event, KeyCode, DisableMouseCapture};
+use git2::Repository;
 use tui::layout::{Layout, Direction, Constraint};
 use tui::style::{Style, Modifier, Color};
 use tui::text::Spans;
@@ -13,18 +14,18 @@ mod commits;
 use commits::CommitList;
 
 struct App {
-    items: CommitList,
+    commits: CommitList,
 }
 
 impl App {
     fn new(commits: Vec<(String, bool)>) -> App {
         App {
-           items: CommitList::with_items(commits),
+           commits: CommitList::with_items(commits),
         }
     }
 }
 
-pub fn init(commits: Vec<String>) {
+pub fn init(commits: (Vec<String>, Repository)) {
     // setup terminal
     enable_raw_mode()
         .expect("unable to initialize raw mode terminal");
@@ -38,7 +39,7 @@ pub fn init(commits: Vec<String>) {
         .expect("unable to initialize tui");
 
     let mut stateful_commits = Vec::new();
-    for commit in commits {
+    for commit in commits.0 {
         stateful_commits.push((commit, false))
     }
 
@@ -71,10 +72,10 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App,) -> io::Result<
         if let Event::Key(key) = event::read()? {
             match key.code {
                 KeyCode::Char('q') => return Ok(()),
-                KeyCode::Enter => app.items.toggle(),
-                KeyCode::Left | KeyCode::Char('h') => app.items.unselect(),
-                KeyCode::Down | KeyCode::Char('j') => app.items.next(),
-                KeyCode::Up | KeyCode::Char('k') => app.items.previous(),
+                KeyCode::Enter => app.commits.toggle(),
+                KeyCode::Left | KeyCode::Char('h') => app.commits.unselect(),
+                KeyCode::Down | KeyCode::Char('j') => app.commits.next(),
+                KeyCode::Up | KeyCode::Char('k') => app.commits.previous(),
                 _ => {}
             }
         }
@@ -87,7 +88,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .constraints([Constraint::Percentage(100)].as_ref())
         .split(f.size());
 
-    let items: Vec<ListItem> = app.items.items.iter().map(|i| {
+    let items: Vec<ListItem> = app.commits.items.iter().map(|i| {
         let lines = vec![Spans::from(i.0.as_str())];
         if i.1 {
             ListItem::new(lines).style(Style::default().fg(Color::Black).bg(Color::LightGreen))
@@ -107,5 +108,5 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
             )
         .highlight_symbol(">> ");
 
-    f.render_stateful_widget(items, commit_list[0], &mut app.items.state);
+    f.render_stateful_widget(items, commit_list[0], &mut app.commits.state);
 }

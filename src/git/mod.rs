@@ -25,7 +25,7 @@ impl ExtendedCommit {
         str
     }
 
-    pub fn get_commit_diff(self, repo: &Repository) -> String {
+    pub fn get_diff(self, repo: &Repository) -> String {
         let diff_obj = get_commit_file_diff(repo, &self.id).unwrap();
         let stats = diff_obj.stats().unwrap();
         let buf = stats.to_buf(DiffStatsFormat::FULL, 80).unwrap();
@@ -34,14 +34,14 @@ impl ExtendedCommit {
     }
 }
 
-pub fn init(path: &String) -> Vec<String> {
+pub fn init(path: &String) -> (Vec<String>, Repository) {
     let repo = match Repository::open(path) {
         Ok(repo) => repo,
         Err(e) => panic!("Could not open repository {}", e),
     };
 
     let commit_str = get_commits(&repo).unwrap();
-    commit_str
+    (commit_str, repo)
 }
 
 pub fn get_commits<'a>(repo: &'a Repository) -> Result<Vec<String>, Error> {
