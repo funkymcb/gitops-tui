@@ -111,7 +111,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     // TODO think about how to get diffs of selected commits herer
     let diffs: Vec<ListItem> = Vec::new();
     let diff_list = List::new(diffs)
-        .block(Block::default().borders(Borders::ALL).title("diff tree"))
+        .block(Block::default().borders(Borders::ALL).title("Diff Tree"))
         .highlight_style(
             Style::default()
                 .fg(Color::Black)

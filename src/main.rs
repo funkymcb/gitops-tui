@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io;
+use std::error;
 use std::io::prelude::*;
 use std::io::BufReader;
 use git2::Repository;
@@ -20,11 +20,11 @@ static CONFIG: Lazy<Config> = Lazy::new(|| {
     from_reader(contents.as_bytes()).expect("Failed to deserialize config file")
 });
 
-fn main() -> Result<(), io::Error> {
+fn main() -> Result<(), Box<dyn error::Error>> {
     let mut stages = Vec::<(Vec<String>, Repository)>::new();
 
     for repo in &CONFIG.clusters {
-        stages.push(git::init(&repo.path));
+        stages.push(git::init(&repo.path)?);
     }
 
     tui::init(stages.remove(0)); // TODO implement logic which stage should be listed

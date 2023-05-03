@@ -1,3 +1,4 @@
+use std::error;
 use std::str::from_utf8;
 
 use git2::{Error, Object, ObjectType, Repository, Sort};
@@ -25,23 +26,23 @@ impl ExtendedCommit {
         str
     }
 
-    pub fn get_diff(self, repo: &Repository) -> String {
-        let diff_obj = get_commit_file_diff(repo, &self.id).unwrap();
-        let stats = diff_obj.stats().unwrap();
-        let buf = stats.to_buf(DiffStatsFormat::FULL, 80).unwrap();
-        let diff = from_utf8(&*buf).unwrap().to_string();
-        diff
+    pub fn get_diff(self, repo: &Repository) -> Result<String, Box<dyn error::Error>>  {
+        let diff_obj = get_commit_file_diff(repo, &self.id)?;
+        let stats = diff_obj.stats()?;
+        let buf = stats.to_buf(DiffStatsFormat::FULL, 80)?;
+        let diff = from_utf8(&*buf)?.to_string();
+        Ok(diff)
     }
 }
 
-pub fn init(path: &String) -> (Vec<String>, Repository) {
+pub fn init(path: &String) -> Result<(Vec<String>, Repository), Error> {
     let repo = match Repository::open(path) {
         Ok(repo) => repo,
         Err(e) => panic!("Could not open repository {}", e),
     };
 
-    let commit_str = get_commits(&repo).unwrap();
-    (commit_str, repo)
+    let commit_str = get_commits(&repo)?;
+    Ok((commit_str, repo))
 }
 
 pub fn get_commits<'a>(repo: &'a Repository) -> Result<Vec<String>, Error> {
@@ -79,7 +80,7 @@ fn convert_timestamp(ts: i64) -> String {
 
 fn get_commit_file_diff<'a>(repo: &'a Repository, commit_id: &String) -> Result<Diff<'a>, Error> {
     let mut opts = DiffOptions::new();
-    let tree = tree_to_treeish(repo, &commit_id.as_str()).unwrap().unwrap();
+    let tree = tree_to_treeish(repo, &commit_id.as_str())?.unwrap();
     repo.diff_tree_to_workdir_with_index(tree.as_tree(), Some(&mut opts))
 }
 
