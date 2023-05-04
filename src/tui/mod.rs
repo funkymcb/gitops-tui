@@ -29,7 +29,7 @@ impl App {
     }
 }
 
-static mut DIFF_FILES: Vec<ListItem> = Vec::new();
+static mut DIFF_TREE: Vec<ListItem> = Vec::new();
 
 pub fn init(commits: (Vec<ExtendedCommit>, Repository)) {
     // setup terminal
@@ -78,7 +78,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App,) -> io::Result<
         if let Event::Key(key) = event::read()? {
             match key.code {
                 KeyCode::Char('q') => return Ok(()),
-                KeyCode::Enter => app.commits.toggle(),
+                KeyCode::Enter => app.commits.toggle(&app.repo),
                 KeyCode::Left | KeyCode::Char('h') => app.commits.unselect(),
                 KeyCode::Down | KeyCode::Char('j') => app.commits.next(),
                 KeyCode::Up | KeyCode::Char('k') => app.commits.previous(),
@@ -115,7 +115,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .highlight_symbol(">> ");
 
     unsafe {
-        let diff_list = List::new(DIFF_FILES.as_ref())
+        let diff_list = List::new(DIFF_TREE.as_ref())
             .block(Block::default().borders(Borders::ALL).title("Diff Tree"))
             .highlight_style(
                 Style::default()

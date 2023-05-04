@@ -17,7 +17,7 @@ pub struct ExtendedCommit {
 
 impl ExtendedCommit {
 // TODO dont return string but some sort of Diff struct itself
-    pub fn get_diff(self, repo: &Repository) -> Result<String, Box<dyn error::Error>>  {
+    pub fn get_diff(&self, repo: &Repository) -> Result<String, Box<dyn error::Error>>  {
         let diff_obj = get_commit_file_diff(repo, &self.id)?;
         let stats = diff_obj.stats()?;
         let buf = stats.to_buf(DiffStatsFormat::FULL, 80)?;

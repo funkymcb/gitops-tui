@@ -17,6 +17,9 @@ Tui to help synchronise different gitops cluster repos
         - [x] add checkbox before string
     - [x] refactor and seperate into modules
     - [ ] file picker based on stages and picked commits
+        - [x] implement tui block
+        - [x] add diff on toggled commit
+        - [ ] toggle logic (remove diff on untoggle)
     - [ ] diff based on picked files
 - [ ] quality of life:
     - [ ] only show commits of master branch

@@ -1,8 +1,9 @@
-use tui::widgets::ListState;
+use git2::Repository;
+use tui::widgets::{ListState, ListItem};
 
 use crate::git::ExtendedCommit;
 
-use super::DIFF_FILES;
+use super::DIFF_TREE;
 
 pub struct CommitList {
     pub state: ListState,
@@ -17,7 +18,7 @@ impl CommitList {
         }
     }
 
-    pub fn toggle(&mut self) {
+    pub fn toggle(&mut self, repo: &Repository) {
         let i = self.state.selected().unwrap();
 
         self.items[i].1 = !self.items[i].1;
@@ -28,11 +29,12 @@ impl CommitList {
             self.items[i].0.display.replace_range(0..4, "[ ] ");
         }
 
-        // TODO append DIFF_FILES here
-        // let diff = self.items[i].0.get_diff();
-        // unsafe {
-        //     DIFF_FILES.push(diff)
-        // }
+        // TODO toggle logic for diffs... Remove item is commit is untoggled
+        let diff = self.items[i].0.get_diff(&repo).unwrap_or(String::from("no diffs"));
+        let list_item = ListItem::new(diff);
+        unsafe {
+            DIFF_TREE.push(list_item);
+        }
     }
 
     pub fn next(&mut self) {
