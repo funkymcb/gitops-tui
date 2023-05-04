@@ -1,12 +1,16 @@
 use tui::widgets::ListState;
 
+use crate::git::ExtendedCommit;
+
+use super::DIFF_FILES;
+
 pub struct CommitList {
     pub state: ListState,
-    pub items: Vec<(String, bool)>,
+    pub items: Vec<(ExtendedCommit, bool)>,
 }
 
 impl CommitList {
-    pub fn with_items(items: Vec<(String, bool)>) -> CommitList {
+    pub fn with_items(items: Vec<(ExtendedCommit, bool)>) -> CommitList {
         CommitList {
             state: ListState::default(), 
             items,
@@ -17,11 +21,18 @@ impl CommitList {
         let i = self.state.selected().unwrap();
 
         self.items[i].1 = !self.items[i].1;
+
         if self.items[i].1 {
-            self.items[i].0.replace_range(0..4, "[x] ");
+            self.items[i].0.display.replace_range(0..4, "[x] ");
         } else {
-            self.items[i].0.replace_range(0..4, "[ ] ");
+            self.items[i].0.display.replace_range(0..4, "[ ] ");
         }
+
+        // TODO append DIFF_FILES here
+        // let diff = self.items[i].0.get_diff();
+        // unsafe {
+        //     DIFF_FILES.push(diff)
+        // }
     }
 
     pub fn next(&mut self) {

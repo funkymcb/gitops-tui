@@ -13,19 +13,25 @@ use std::{io, vec};
 mod commits;
 use commits::CommitList;
 
+use crate::git::ExtendedCommit;
+
 struct App {
     commits: CommitList,
+    repo: Repository
 }
 
 impl App {
-    fn new(commits: Vec<(String, bool)>) -> App {
+    fn new(commits: Vec<(ExtendedCommit, bool)>, repo: Repository) -> App {
         App {
            commits: CommitList::with_items(commits),
+           repo
         }
     }
 }
 
-pub fn init(commits: (Vec<String>, Repository)) {
+static mut DIFF_FILES: Vec<ListItem> = Vec::new();
+
+pub fn init(commits: (Vec<ExtendedCommit>, Repository)) {
     // setup terminal
     enable_raw_mode()
         .expect("unable to initialize raw mode terminal");
@@ -38,13 +44,13 @@ pub fn init(commits: (Vec<String>, Repository)) {
     let mut terminal = Terminal::new(backend)
         .expect("unable to initialize tui");
 
-    let mut stateful_commits = Vec::new();
+   let mut stateful_commits = Vec::new();
     for commit in commits.0 {
         stateful_commits.push((commit, false))
     }
 
     // create app and run it
-    let app = App::new(stateful_commits);
+    let app = App::new(stateful_commits, commits.1);
     let res = run_app(&mut terminal, app);
 
     disable_raw_mode()
@@ -89,7 +95,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .split(f.size());
 
     let commits: Vec<ListItem> = app.commits.items.iter().map(|i| {
-        let lines = vec![Spans::from(i.0.as_str())];
+        let lines = vec![Spans::from(i.0.display.as_str())];
         if i.1 {
             ListItem::new(lines).style(Style::default().fg(Color::Black).bg(Color::LightGreen))
         } else {
@@ -108,18 +114,18 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
             )
         .highlight_symbol(">> ");
 
-    // TODO think about how to get diffs of selected commits herer
-    let diffs: Vec<ListItem> = Vec::new();
-    let diff_list = List::new(diffs)
-        .block(Block::default().borders(Borders::ALL).title("Diff Tree"))
-        .highlight_style(
-            Style::default()
-                .fg(Color::Black)
-                .bg(Color::White)
-                .add_modifier(Modifier::BOLD),
-            )
-        .highlight_symbol(">> ");
+    unsafe {
+        let diff_list = List::new(DIFF_FILES.as_ref())
+            .block(Block::default().borders(Borders::ALL).title("Diff Tree"))
+            .highlight_style(
+                Style::default()
+                    .fg(Color::Black)
+                    .bg(Color::White)
+                    .add_modifier(Modifier::BOLD),
+                )
+            .highlight_symbol(">> ");
+        f.render_stateful_widget(diff_list, chunks[1], &mut app.commits.state);
+    }
 
     f.render_stateful_widget(commit_list, chunks[0], &mut app.commits.state);
-    f.render_stateful_widget(diff_list, chunks[1], &mut app.commits.state);
 }

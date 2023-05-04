@@ -2,6 +2,7 @@ use std::fs::File;
 use std::error;
 use std::io::prelude::*;
 use std::io::BufReader;
+use git::ExtendedCommit;
 use git2::Repository;
 use once_cell::sync::Lazy;
 use serde_yaml::from_reader;
@@ -21,7 +22,7 @@ static CONFIG: Lazy<Config> = Lazy::new(|| {
 });
 
 fn main() -> Result<(), Box<dyn error::Error>> {
-    let mut stages = Vec::<(Vec<String>, Repository)>::new();
+    let mut stages = Vec::<(Vec<ExtendedCommit>, Repository)>::new();
 
     for repo in &CONFIG.clusters {
         stages.push(git::init(&repo.path)?);

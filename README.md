@@ -23,3 +23,14 @@ Tui to help synchronise different gitops cluster repos
 
 # raw ideas
 only if commit selected we show diffs
+
+# layout ideas
+|----------------|
+| commits        | 25%
+|--------|-------|
+|diff-   |file-  |
+|tree    |prev   | 50%
+|        |       |
+|--------|-------|
+| ? menu ?       | 25%
+|----------------|

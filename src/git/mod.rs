@@ -8,24 +8,15 @@ use crate::CONFIG;
 
 #[derive(Debug)]
 pub struct ExtendedCommit {
-    pub id: String,
-    pub summary: String,
     pub author: String,
     pub date: String,
+    pub display: String,
+    pub id: String,
+    pub summary: String
 }
 
 impl ExtendedCommit {
-    fn to_string(self) -> String {
-        let str = format!(
-            "[ ] {}: {}: {}: {}",
-            self.date,
-            self.id,
-            self.author,
-            self.summary,
-        );
-        str
-    }
-
+// TODO dont return string but some sort of Diff struct itself
     pub fn get_diff(self, repo: &Repository) -> Result<String, Box<dyn error::Error>>  {
         let diff_obj = get_commit_file_diff(repo, &self.id)?;
         let stats = diff_obj.stats()?;
@@ -35,17 +26,17 @@ impl ExtendedCommit {
     }
 }
 
-pub fn init(path: &String) -> Result<(Vec<String>, Repository), Error> {
+pub fn init(path: &String) -> Result<(Vec<ExtendedCommit>, Repository), Error> {
     let repo = match Repository::open(path) {
         Ok(repo) => repo,
         Err(e) => panic!("Could not open repository {}", e),
     };
 
-    let commit_str = get_commits(&repo)?;
-    Ok((commit_str, repo))
+    let commit = get_commits(&repo)?;
+    Ok((commit, repo))
 }
 
-pub fn get_commits<'a>(repo: &'a Repository) -> Result<Vec<String>, Error> {
+pub fn get_commits<'a>(repo: &'a Repository) -> Result<Vec<ExtendedCommit>, Error> {
     let mut revwalk = repo.revwalk()?;
 
     revwalk.push_head()?;
@@ -54,17 +45,22 @@ pub fn get_commits<'a>(repo: &'a Repository) -> Result<Vec<String>, Error> {
     let mut commits = Vec::new();
     for rev in revwalk {
         let commit = repo.find_commit(rev?)?;
-        let id = commit.id().to_string()[0..8].to_string();
+
+        let author = String::from(commit.author().name().unwrap_or("unknown"));
         let date = convert_timestamp(commit.author().when().seconds());
+        let id = commit.id().to_string()[0..8].to_string();
+        let summary = String::from(commit.summary().unwrap_or(""));
+        let display = create_display(&id, &summary, &author, &date);
 
         let extd_commit = ExtendedCommit {
-            id,
-            summary: String::from(commit.summary().unwrap_or("")),
-            author: String::from(commit.author().name().unwrap_or("unknown")),
+            author,
             date,
+            display,
+            id,
+            summary
         };
 
-        commits.push(extd_commit.to_string());
+        commits.push(extd_commit);
     }
 
     Ok(commits)
@@ -76,6 +72,22 @@ fn convert_timestamp(ts: i64) -> String {
     let date = datetime.format(CONFIG.general.time_format.as_str());
     let date_string = date.to_string();
     return date_string;
+}
+
+fn create_display(
+    id: &String,
+    summary: &String,
+    author: &String,
+    date: &String
+) -> String {
+    let str = format!(
+        "[ ] {}: {}: {}: {}",
+        date,
+        id,
+        author,
+        summary,
+    );
+    str
 }
 
 fn get_commit_file_diff<'a>(repo: &'a Repository, commit_id: &String) -> Result<Diff<'a>, Error> {
