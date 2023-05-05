@@ -6,6 +6,9 @@ use git2::{Diff, DiffOptions, DiffStatsFormat};
 use chrono::prelude::*;
 use crate::CONFIG;
 
+#[cfg(test)]
+mod tests;
+
 #[derive(Debug)]
 pub struct ExtendedCommit {
     pub author: String,
@@ -17,11 +20,14 @@ pub struct ExtendedCommit {
 
 impl ExtendedCommit {
 // TODO dont return string but some sort of Diff struct itself
+// for now we will parse the returned diffstats string... this is prone to error tho
+// need to find a way to list the files programatically utilising the git2 module
     pub fn get_diff(&self, repo: &Repository) -> Result<String, Box<dyn error::Error>>  {
         let diff_obj = get_commit_file_diff(repo, &self.id)?;
         let stats = diff_obj.stats()?;
         let buf = stats.to_buf(DiffStatsFormat::FULL, 80)?;
         let diff = from_utf8(&*buf)?.to_string();
+        // let stripped_diff = strip_diff_to_files(diff);
         Ok(diff)
     }
 }
@@ -93,7 +99,7 @@ fn create_display(
 fn get_commit_file_diff<'a>(repo: &'a Repository, commit_id: &String) -> Result<Diff<'a>, Error> {
     let mut opts = DiffOptions::new();
     let tree = tree_to_treeish(repo, &commit_id.as_str())?.unwrap();
-    repo.diff_tree_to_workdir_with_index(tree.as_tree(), Some(&mut opts))
+    repo.diff_tree_to_workdir(tree.as_tree(), Some(&mut opts))
 }
 
 fn tree_to_treeish<'a>(
@@ -103,4 +109,9 @@ fn tree_to_treeish<'a>(
     let obj = repo.revparse_single(arg)?;
     let tree = obj.peel(ObjectType::Tree)?;
     Ok(Some(tree))
+}
+
+fn strip_diff_to_files(diff_str: String) -> String {
+    // TODO implement logic like in tests
+    String::new()
 }

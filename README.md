@@ -28,12 +28,12 @@ Tui to help synchronise different gitops cluster repos
 only if commit selected we show diffs
 
 # layout ideas
-|----------------|
-| commits        | 25%
-|--------|-------|
-|diff-   |file-  |
-|tree    |prev   | 50%
-|        |       |
-|--------|-------|
-| ? menu ?       | 25%
-|----------------|
+x |----------------|
+x | commits        | 25%
+x |--------|-------|
+x |diff-   |file-  |
+x |tree    |prev   | 50%
+x |        |       |
+x |--------|-------|
+x | ? menu ?       | 25%
+x |----------------|

@@ -75,6 +75,8 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App,) -> io::Result<
     loop {
         terminal.draw(|f| ui(f, &mut app))?;
 
+        // TODO seperate list movement keys (currently they work for all lists in parallel)
+        // maybe switch focused list by pressing ctrl+arrow (ctrl+vim-key)
         if let Event::Key(key) = event::read()? {
             match key.code {
                 KeyCode::Char('q') => return Ok(()),
