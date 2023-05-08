@@ -26,7 +26,7 @@ impl ExtendedCommit {
         let diff_obj = get_commit_file_diff(repo, &self.id)?;
         let stats = diff_obj.stats()?;
         let buf = stats.to_buf(DiffStatsFormat::FULL, 80)?;
-        let diff = from_utf8(&*buf)?.to_string();
+        let diff = from_utf8(&buf)?.to_string();
         // let stripped_diff = strip_diff_to_files(diff);
         Ok(diff)
     }
@@ -42,7 +42,7 @@ pub fn init(path: &String) -> Result<(Vec<ExtendedCommit>, Repository), Error> {
     Ok((commit, repo))
 }
 
-pub fn get_commits<'a>(repo: &'a Repository) -> Result<Vec<ExtendedCommit>, Error> {
+pub fn get_commits(repo: &Repository) -> Result<Vec<ExtendedCommit>, Error> {
     let mut revwalk = repo.revwalk()?;
 
     revwalk.push_head()?;
@@ -76,8 +76,7 @@ fn convert_timestamp(ts: i64) -> String {
     let datetime = Local.timestamp_opt(ts, 0).unwrap();
 
     let date = datetime.format(CONFIG.general.time_format.as_str());
-    let date_string = date.to_string();
-    return date_string;
+    date.to_string()
 }
 
 fn create_display(id: &String, summary: &String, author: &String, date: &String) -> String {
@@ -85,9 +84,9 @@ fn create_display(id: &String, summary: &String, author: &String, date: &String)
     str
 }
 
-fn get_commit_file_diff<'a>(repo: &'a Repository, commit_id: &String) -> Result<Diff<'a>, Error> {
+fn get_commit_file_diff<'a>(repo: &'a Repository, commit_id: &str) -> Result<Diff<'a>, Error> {
     let mut opts = DiffOptions::new();
-    let tree = tree_to_treeish(repo, &commit_id.as_str())?.unwrap();
+    let tree = tree_to_treeish(repo, commit_id)?.unwrap();
     repo.diff_tree_to_workdir(tree.as_tree(), Some(&mut opts))
 }
 

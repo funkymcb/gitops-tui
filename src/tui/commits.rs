@@ -32,7 +32,7 @@ impl CommitList {
         // TODO toggle logic for diffs... Remove item is commit is untoggled
         let diff = self.items[i]
             .0
-            .get_diff(&repo)
+            .get_diff(repo)
             .unwrap_or(String::from("no diffs"));
         let list_item = ListItem::new(diff);
         unsafe {
