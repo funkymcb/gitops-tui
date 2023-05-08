@@ -1,11 +1,11 @@
-use std::fs::File;
-use std::error;
-use std::io::prelude::*;
-use std::io::BufReader;
 use git::ExtendedCommit;
 use git2::Repository;
 use once_cell::sync::Lazy;
 use serde_yaml::from_reader;
+use std::error;
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::BufReader;
 
 use config::Config;
 
@@ -17,7 +17,9 @@ static CONFIG: Lazy<Config> = Lazy::new(|| {
     let file = File::open("config.yaml").expect("Failed to open config file");
     let mut buf_reader = BufReader::new(file);
     let mut contents = String::new();
-    buf_reader.read_to_string(&mut contents).expect("Failed to read config file");
+    buf_reader
+        .read_to_string(&mut contents)
+        .expect("Failed to read config file");
     from_reader(contents.as_bytes()).expect("Failed to deserialize config file")
 });
 

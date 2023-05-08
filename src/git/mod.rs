@@ -1,10 +1,10 @@
 use std::error;
 use std::str::from_utf8;
 
-use git2::{Error, Object, ObjectType, Repository, Sort};
-use git2::{Diff, DiffOptions, DiffStatsFormat};
-use chrono::prelude::*;
 use crate::CONFIG;
+use chrono::prelude::*;
+use git2::{Diff, DiffOptions, DiffStatsFormat};
+use git2::{Error, Object, ObjectType, Repository, Sort};
 
 #[cfg(test)]
 mod tests;
@@ -15,14 +15,14 @@ pub struct ExtendedCommit {
     pub date: String,
     pub display: String,
     pub id: String,
-    pub summary: String
+    pub summary: String,
 }
 
 impl ExtendedCommit {
-// TODO dont return string but some sort of Diff struct itself
-// for now we will parse the returned diffstats string... this is prone to error tho
-// need to find a way to list the files programatically utilising the git2 module
-    pub fn get_diff(&self, repo: &Repository) -> Result<String, Box<dyn error::Error>>  {
+    // TODO dont return string but some sort of Diff struct itself
+    // for now we will parse the returned diffstats string... this is prone to error tho
+    // need to find a way to list the files programatically utilising the git2 module
+    pub fn get_diff(&self, repo: &Repository) -> Result<String, Box<dyn error::Error>> {
         let diff_obj = get_commit_file_diff(repo, &self.id)?;
         let stats = diff_obj.stats()?;
         let buf = stats.to_buf(DiffStatsFormat::FULL, 80)?;
@@ -63,7 +63,7 @@ pub fn get_commits<'a>(repo: &'a Repository) -> Result<Vec<ExtendedCommit>, Erro
             date,
             display,
             id,
-            summary
+            summary,
         };
 
         commits.push(extd_commit);
@@ -80,19 +80,8 @@ fn convert_timestamp(ts: i64) -> String {
     return date_string;
 }
 
-fn create_display(
-    id: &String,
-    summary: &String,
-    author: &String,
-    date: &String
-) -> String {
-    let str = format!(
-        "[ ] {}: {}: {}: {}",
-        date,
-        id,
-        author,
-        summary,
-    );
+fn create_display(id: &String, summary: &String, author: &String, date: &String) -> String {
+    let str = format!("[ ] {}: {}: {}: {}", date, id, author, summary,);
     str
 }
 
@@ -102,10 +91,7 @@ fn get_commit_file_diff<'a>(repo: &'a Repository, commit_id: &String) -> Result<
     repo.diff_tree_to_workdir(tree.as_tree(), Some(&mut opts))
 }
 
-fn tree_to_treeish<'a>(
-    repo: &'a Repository,
-    arg: &'a str
-) -> Result<Option<Object<'a>>, Error> {
+fn tree_to_treeish<'a>(repo: &'a Repository, arg: &'a str) -> Result<Option<Object<'a>>, Error> {
     let obj = repo.revparse_single(arg)?;
     let tree = obj.peel(ObjectType::Tree)?;
     Ok(Some(tree))

@@ -1,5 +1,5 @@
 use git2::Repository;
-use tui::widgets::{ListState, ListItem};
+use tui::widgets::{ListItem, ListState};
 
 use crate::git::ExtendedCommit;
 
@@ -13,7 +13,7 @@ pub struct CommitList {
 impl CommitList {
     pub fn with_items(items: Vec<(ExtendedCommit, bool)>) -> CommitList {
         CommitList {
-            state: ListState::default(), 
+            state: ListState::default(),
             items,
         }
     }
@@ -30,7 +30,10 @@ impl CommitList {
         }
 
         // TODO toggle logic for diffs... Remove item is commit is untoggled
-        let diff = self.items[i].0.get_diff(&repo).unwrap_or(String::from("no diffs"));
+        let diff = self.items[i]
+            .0
+            .get_diff(&repo)
+            .unwrap_or(String::from("no diffs"));
         let list_item = ListItem::new(diff);
         unsafe {
             DIFF_TREE.push(list_item);
